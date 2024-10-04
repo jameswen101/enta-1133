@@ -2,9 +2,10 @@
 
 public class DieRoller
 {
-    public int numberOfSides; 
+    public int numberOfSides;
     public int roll; //value of number rolled
     Random random = new Random(); //Create an instance of Random
+    public bool userRolled, cpuRolled = false;
 
     public int Roll()
     {
@@ -16,4 +17,3 @@ public class DieRoller
         this.numberOfSides = numberOfSides;
     }
 }
-

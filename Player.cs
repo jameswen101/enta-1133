@@ -2,12 +2,14 @@
 
 public class Player
 {
-	public int score = 0;
+    public int roundScore, totalScore = 0;
     public int turnsTaken = 0;
-	public bool sixRolled, eightRolled, twelveRolled, twentyRolled = false; //stores whether each die has been rolled or not
+    public int roundsWon = 0;
+    public List<DieRoller> Dice = new List<DieRoller>();
+    public String name;
 
-	public Player() //constructor
-	{
-       
-	}
+    public Player(String name) //constructor
+    {
+        this.name = name;
+    }
 }
