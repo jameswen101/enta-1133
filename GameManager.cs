@@ -1,393 +1,356 @@
-﻿using System;
-using System.Collections;
-using System.Reflection.Emit;
+﻿using System.Xml.Linq;
 
 public class GameManager
 {
     public void PlayGame()
     {
-
-        DieRoller fiftySidedDie = new DieRoller(50); //die only used for deciding turn order
-        Console.WriteLine("__        __   _                            _          ____  _      \r\n\\ \\      / /__| | ___ ___  _ __ ___   ___  | |_ ___   |  _ \\(_) ___ \r\n \\ \\ /\\ / / _ \\ |/ __/ _ \\| '_ ` _ \\ / _ \\ | __/ _ \\  | | | | |/ _ \\\r\n  \\ V  V /  __/ | (_| (_) | | | | | |  __/ | || (_) | | |_| | |  __/\r\n   \\_/\\_/ \\___|_|\\___\\___/|_| |_| |_|\\___|  \\__\\___/  |____/|_|\\___|\r\n__   _____  |  _ \\(_) ___| |                                        \r\n\\ \\ / / __| | | | | |/ _ \\ |                                        \r\n \\ V /\\__ \\ | |_| | |  __/_|                                        \r\n  \\_/ |___/ |____/|_|\\___(_)                                        ");
-        Console.WriteLine("What is your name?");
+        //Game setup
+        Console.WriteLine("__        __   _                            _               \r\n\\ \\      / /__| | ___ ___  _ __ ___   ___  | |_ ___         \r\n \\ \\ /\\ / / _ \\ |/ __/ _ \\| '_ ` _ \\ / _ \\ | __/ _ \\        \r\n  \\ V  V /  __/ | (_| (_) | | | | | |  __/ | || (_) |       \r\n _ \\_/\\_/ \\___|_|\\___\\___/|_| |_| |_|\\___|  \\__\\___/  _     \r\n| | | |_   _ _ __ | |_(_)_ __   __ _  __      _(_) |_| |__  \r\n| |_| | | | | '_ \\| __| | '_ \\ / _` | \\ \\ /\\ / / | __| '_ \\ \r\n|  _  | |_| | | | | |_| | | | | (_| |  \\ V  V /| | |_| | | |\r\n|_|_|_|\\__,_|_| |_|\\__|_|_| |_|\\__, |   \\_/\\_/ |_|\\__|_| |_|\r\n|  _ \\(_) ___ ___| |           |___/                        \r\n| | | | |/ __/ _ \\ |                                        \r\n| |_| | | (_|  __/_|                                        \r\n|____/|_|\\___\\___(_)                                        ");
+        //Welcome to Hunting with Dice!
+        Console.WriteLine("__        ___           _   _                              \r\n\\ \\      / / |__   __ _| |_( )___   _   _  ___  _   _ _ __ \r\n \\ \\ /\\ / /| '_ \\ / _` | __|// __| | | | |/ _ \\| | | | '__|\r\n  \\ V  V / | | | | (_| | |_  \\__ \\ | |_| | (_) | |_| | |   \r\n   \\_/\\_/  |_| |_|\\__,_|\\__|_|___/  \\__, |\\___/ \\__,_|_|   \r\n _ __   __ _ _ __ ___   __|__ \\     |___/                  \r\n| '_ \\ / _` | '_ ` _ \\ / _ \\/ /                            \r\n| | | | (_| | | | | | |  __/_|                             \r\n|_| |_|\\__,_|_| |_| |_|\\___(_)                             ");
+        //What's your name?
         String userName = " ";
         userName = Console.ReadLine();
-        String cpuName = "CPU";
-        Player user = new Player(userName); //declaring player object for user
-        Player cpu = new Player(cpuName); //declaring player object for cpu
-        Player firstTurn = user; //holds the player who gets to go first
+        User user = new User(userName); //declaring player object for user
+        Eagle cpu1 = new Eagle("Eagle"); //declaring player objects for cpu
+        Alligator cpu2 = new Alligator("Alligator"); //declaring player objects for cpu
+        Wolf cpu3 = new Wolf("Wolf"); //declaring player objects for cpu
+        Bear cpu4 = new Bear("Bear"); //declaring player objects for cpu
+        Room[,] map = new Room[5, 5];
+        Room currentRoom = new Room(user.row, user.col);
+        List<Item> items = new List<Item>();
+        List<Meat> meats = new List<Meat>();
+        List<Enemy> enemies = new List<Enemy>();
+        Item deadSquirrel = new DeadSquirrel("Dead Squirrel");
+        Meat steak = new Steak("Steak", 20);
+        Item taser = new Taser("Taser");
+        Item shield = new Shield("Shield");
+        Item bloodyBlade = new BloodyBlade("Bloody Blade");
+        Item fire = new Fire("Fire");
+        Meat porkRibs = new PorkRibs("Pork Ribs", 10);
+        Item camouflage = new Camouflage("Camouflage");
+        Meat drumstick = new Drumstick("Drumstick", 5);
+        Meat salmon = new Salmon("Salmon", 15);
+
+        items.Add(fire);
+        items.Add(shield);
+        items.Add(camouflage);
+        items.Add(taser);
+        items.Add(deadSquirrel);
+        items.Add(bloodyBlade);
+        meats.Add(porkRibs);
+        meats.Add(steak);
+        meats.Add(drumstick);
+        meats.Add(salmon);
+        enemies.Add(cpu1);
+        enemies.Add(cpu2);
+        enemies.Add(cpu3);
+        enemies.Add(cpu4);
 
         //let user freely enter the die sizes they want + cpu uses the same dice
-         int number = 0;
-        Console.WriteLine("In this game, you will take turns rolling 4 dice of any size you like with the CPU. But first, I need to know how big are your desired dice:");
-         for (int count = 1; count <= 4; count++) {
-         do {
-         Console.WriteLine("How many sides do you want in this die?");
-         number = int.Parse(Console.ReadLine());
-         if (number < 6) {
-         Console.WriteLine("Please enter a number not smaller than 6.");
-         } //if code ends
-         } while (number < 6); //do-while loop code ends
-         user.Dice.Add(new DieRoller(number));
-         } //for loop code ends
-         cpu.Dice = user.Dice; 
-       
+        int number = 0;
+        Console.WriteLine("                                                                                               -%@@-\r\n                                                                                          ..*@@@@@@@\r\n                                                                                      .-#@@@@@@@#-..\r\n                                                                                ...=#@@@@@@@*-...   \r\n                                                                             .:+%@@@@@@@+:..        \r\n                    ........:...                                       ...-*@@@@@@@%=:..            \r\n                  ..=@@@@@@@@@@#.                                   .:+%@@@@@@@@*..                 \r\n                .-@@@@@@@@@@@@@@@+.                           ...-*@@@@@@@@@*.....                  \r\n               :@@@@@@@@@@@@@@@@@@#..                     ..:=%@@@@@@@@@@@+:.                       \r\n             .=@@@@@@@@@@@@@@@@@@@@@:........       ...:=#@@@@@@@@@@@@@*..                          \r\n            ..@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@%.    ..#@@@@@@@@@@@@@@@@@#.                            \r\n            .#@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@...*#@@@@@@@@@@@@@@@@@@#-..                            \r\n           .:@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@%. .-@@@@@@@@@@@@@@@@@@@*.                               \r\n           .#@@@@@@@@@@@@@@@@@@@@@@@*.....#@#.%@@@@@@@#:=@@@@@@@@@@#.                               \r\n           ..*@@@@@@@@@@@@@@@@@@@@@@..  .@@@@@@@@@@@+%-:@@@@@@@@%=...                               \r\n            .:@@@@@@@@@@@@@@@@@@@@@@@...*@@@@@@@@@%@-+=+@@@@@@:.                                    \r\n          ..:@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@#-:.:@@@@@@:.                                     \r\n        .:@@%@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@-. .#@@@@@#.                                      \r\n        .#@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@*...-@@@@@@=.                                      \r\n       ..%@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@-   -@@@@@@#.                                       \r\n      .=@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@%:.=@@@@@+.:@@@@@@@-                                        \r\n     .*@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@+  .:@@@@@@@@@@@@@@%.                                        \r\n  ..:#@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@*. .-@@@@@@@@@@@@@@@-                                         \r\n  .*@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@#:+:#@@@@@@@@@@@@@@@#.                                         \r\n .=@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@-.                                         \r\n .%@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@#.                                         \r\n :@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@=.                                         \r\n.%@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@-.                                         \r\n-@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@=.                                          \r\n=@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@#.                                           \r\n@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@+..                                           \r\n=@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@:.                                             \r\n:@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@*:                                               \r\n.@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@#=:...                                                \r\n.@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@%*+-..                                                         \r\n.@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@*.                                                             \r\n.@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@=                                                             \r\n.%@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@:                                                            \r\n.#@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@%..                                                          \r\n.+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@%.                                                          ");
+        //show picture of a hunter
+        Console.WriteLine("You are a hunter who loves meat but has no money, and hunting is your only solution for feeding yourself. However, you will be facing four hungry apex predators that will attack you. \n But first, you will choose the size of the four dice that decide how much you and the predators can attack each other:");
+        for (int count = 0; count < 4; count++)
+        {
+            if (count == 0)
+            {
+                do
+                {
+                    Console.WriteLine("How many sides do you want in this die?");
+                    number = int.Parse(Console.ReadLine());
+                    if (number < 6)
+                    { //in the case of Dice[0], the only limit is that the # of sides must be 6+
+                        Console.WriteLine("Please enter a number not smaller than 6.");
+                    } //if code ends
+                } while (number < 6); //do-while loop code ends
+            }
 
-        Console.WriteLine("Who's going first? Let's use a really big die to decide.\n Roll evens and you get to go first!");
-        if (fiftySidedDie.Roll() % 2 == 1)
+            else
+            {
+                do
+                {
+                    Console.WriteLine("How many sides do you want in this die?");
+                    number = int.Parse(Console.ReadLine());
+                    if (number < 6 || number <= user.Dice[count - 1].numberOfSides)
+                    { //the number of sides in this die must be larger than the last die
+                        Console.WriteLine("Please enter a number not smaller than 6 or your previous die."); //the size of each next die the user inputs must be larger than the last one
+                    } //if code ends
+                } while (number < 6 || number <= user.Dice[count - 1].numberOfSides); //do-while loop code ends
+            }
+            user.Dice.Add(new DieRoller(number)); //add die to user's dice list
+        } //for loop code ends
+        cpu1.Dice.Add(user.Dice[0]);
+        cpu2.Dice.Add(user.Dice[1]);
+        cpu3.Dice.Add(user.Dice[2]);
+        cpu4.Dice.Add(user.Dice[3]);
+        user.health = user.Dice[0].numberOfSides + user.Dice[1].numberOfSides + user.Dice[2].numberOfSides + user.Dice[3].numberOfSides;
+        cpu1.health = cpu1.Dice[0].numberOfSides * 2;
+        cpu2.health = cpu2.Dice[0].numberOfSides * 2;
+        cpu3.health = cpu3.Dice[0].numberOfSides * 2;
+        cpu4.health = cpu4.Dice[0].numberOfSides * 2;
+
+        setUpMap(map, user, cpu1, cpu2, cpu3, cpu4);
+        user.row = 0; //put user and enemies in starting positions
+        user.col = 0;
+        cpu1.row = 1;
+        cpu2.row = 2;
+        cpu3.row = 3;
+        cpu4.row = 4;
+        cpu1.col = 1; cpu2.col = 2;
+        cpu3.col = 3; cpu4.col = 4;
+
+        void setUpMap(Room[,] map, User user, Enemy cpu1, Enemy cpu2, Enemy cpu3, Enemy cpu4)
         {
-            firstTurn = cpu;
-            Console.WriteLine($"The number rolled was {fiftySidedDie.roll}. CPU goes first"); //if the result is odd
-        }
-        else
-        {
-            firstTurn = user;
-            Console.WriteLine($"The number rolled was {fiftySidedDie.roll}. User goes first"); //if the result is even
+            for (int row = 0; row < map.GetLength(0); row++)
+            {
+                for (int col = 0; col < map.GetLength(1); col++)
+                {
+
+                    if ((row == 2 || col == 2) && !(row == 2 && col == 2) && !(row == 2 && col == 4) && !(row == 4 && col == 2)) //excludes (2,2), (2,4), (4,2)
+                    {
+                        map[row, col] = new TreasureRoom(row, col);
+                        map[row, col].hasItem = true; //put items in rows and columns 2
+                    }
+                    else if ((row == 0 && col == 4) || (row == 4 && col == 0) || (row == 2 && col == 4) || (row == 4 && col == 2)) //for (0,4), (4,0), (2,4), and (4,2)
+                    {
+                        map[row, col] = new DiningRoom(row, col);
+                        map[row, col].hasMeat = true; //meat in rooms with both 2 and 4
+                    }
+                    else if (row == col && row > 0 && col > 0)
+                    {
+                        map[row, col] = new CombatRoom(row, col);
+                        map[row, col].hasEnemy = true; //enemies' starting positions are doubles
+                    }
+                    else
+                    {
+                        map[row, col] = new Room(row, col); //make new normal rooms for each space in the map
+                    }
+                }
+            }
+
         }
 
-        if (firstTurn == user)
+        //Game officially begins here
+        while (user.health > 0 && cpu1.health > 0 || cpu2.health > 0 || cpu3.health > 0 || cpu4.health > 0)
         {
-            for (int i = 1; i < 5; i++)
+            checkRoomMatch(map, user, cpu1, cpu2, cpu3, cpu4);
+            if (user.health > 0 && cpu1.health > 0 || cpu2.health > 0 || cpu3.health > 0 || cpu4.health > 0)
             {
-                userTurn(user, cpu);
-                cpuTurn(user, cpu);
-                showRoundWinner(user, cpu);
+                currentRoom.OnRoomExit(user);
+                currentRoom.row = user.row;
+                currentRoom.col = user.col;
             }
-            endOfGame(user, cpu);
         }
-        if (firstTurn == cpu)
+        //Game ends
+        endOfGame(user, cpu1, cpu2, cpu3, cpu4);
+
+        void checkRoomMatch(Room[,] map, User user, Enemy cpu1, Enemy cpu2, Enemy cpu3, Enemy cpu4)
         {
-            for (int i = 1; i < 5; i++)
+            for (int row = 0; row < map.GetLength(0); row++)
             {
-                cpuTurn(user, cpu);
-                userTurn(user, cpu);
-                showRoundWinner(user, cpu);
+                for (int col = 0; col < map.GetLength(1); col++)
+                {
+                    if (row == user.row && col == user.col)
+                    {
+                        Console.WriteLine($"{user.name} is in room at {map[row, col].name} at [{row}, {col}]");
+
+                        if (map[row, col].hasItem)
+                        {
+                            Random itemRandom = new Random();
+                            int itemNum = itemRandom.Next(0, items.Count);
+                            Console.WriteLine($"Congratulations! You have received the item {items[itemNum].itemName}! \n{items[itemNum].asciiArt} \n{items[itemNum].description} \nGood luck fighting off the apex predators!");
+                            user.ItemInventory.Add(items[itemNum]);
+                            user.noItems = false;
+                        }
+                        else if (map[row, col].hasMeat)
+                        {
+                            Random meatRandom = new Random();
+                            int meatNum = meatRandom.Next(0, meats.Count);
+                            Console.WriteLine($"Congratulations! You have received the item {meats[meatNum].meatName}! \n {meats[meatNum].asciiArt} \n{meats[meatNum].description} \nGood luck fighting off the apex predators!");
+                            user.health += meats[meatNum].healthBoost;
+                            Console.WriteLine($"Your health is now {user.health}."); //health may be more than the initial amount
+                        }
+                        else if (map[row, col].hasEnemy)
+                        {
+                            foreach (Enemy enemy in enemies)
+                            {
+                                if (user.row == enemy.row && user.col == enemy.col)
+                                {
+                                    if (enemy.health > 0)
+                                    {
+                                        enemyApproaching(); //show enemy approaching message
+                                        Console.WriteLine(enemy.asciiArt); //show ASCII art of the enemy
+                                        Console.WriteLine($"Enemy's health: {enemy.health}");
+                                        exchangeAttack(user, enemy);
+                                    }
+                                    if (enemy.health <= 0)
+                                    {
+                                        enemy.enemyIsDead();
+                                    }
+                                }
+                            }
+                        }
+                        else
+                        {
+                            Console.WriteLine("This room is safe.");
+                        }
+                    }
+                }
             }
-            endOfGame(user, cpu);
+        }
+        void enemyApproaching()
+        {
+            Console.WriteLine(" _____ _   _ _____ __  ____   __                             \r\n| ____| \\ | | ____|  \\/  \\ \\ / /                             \r\n|  _| |  \\| |  _| | |\\/| |\\ V /                              \r\n| |___| |\\  | |___| |  | | | |                               \r\n|_____|_|_\\_|_____|_| _|_| |_|    ____ _   _ ___ _   _  ____ \r\n   / \\  |  _ \\|  _ \\ / _ \\  / \\  / ___| | | |_ _| \\ | |/ ___|\r\n  / _ \\ | |_) | |_) | | | |/ _ \\| |   | |_| || ||  \\| | |  _ \r\n / ___ \\|  __/|  _ <| |_| / ___ \\ |___|  _  || || |\\  | |_| |\r\n/_/   \\_\\_|   |_| \\_\\\\___/_/   \\_\\____|_| |_|___|_| \\_|\\____|");
+            //ENEMY APPROACHING
         }
 
-    }
-    public void userTurn(Player user, Player cpu) //UserTurn different from CPUTurn since one requires input and one doesn't
-    {
-        bool isCurrentTurn = true;
-        int num = 0;
-         
-        while (user.turnsTaken < 5 && isCurrentTurn == true)
+        void exchangeAttack(User user, Enemy enemy)
         {
-            
-            Console.WriteLine("__   __                 _____                 \r\n\\ \\ / /__  _   _ _ __  |_   _|   _ _ __ _ __  \r\n \\ V / _ \\| | | | '__|   | || | | | '__| '_ \\ \r\n  | | (_) | |_| | |      | || |_| | |  | | | |\r\n  |_|\\___/ \\__,_|_|      |_| \\__,_|_|  |_| |_|");
-            while (num != user.Dice[0].numberOfSides && num != user.Dice[1].numberOfSides && num != user.Dice[2].numberOfSides && num != user.Dice[3].numberOfSides)
+            bool rightChoice = false;
+            if (!user.noItems)
             {
-            Console.WriteLine("Which die would you like to roll?");
-                num = int.Parse(Console.ReadLine());
-            } //while loop code ends
-                if (num == user.Dice[0].numberOfSides)
+                String response = " ";
+                do
                 {
-                    if (user.Dice[0].userRolled == true)
+                    Console.WriteLine("Do you wish to use any items?");
+                    response = Console.ReadLine();
+                    if (response.ToUpper() != "YES" && response.ToUpper() != "NO")
                     {
-                        Console.WriteLine("Already rolled"); //asks user to choose die again
-                    while (num != user.Dice[1].numberOfSides && num != user.Dice[2].numberOfSides && num != user.Dice[3].numberOfSides)
-                    {
-                        Console.WriteLine("Which die would you like to roll?");
-                        num = int.Parse(Console.ReadLine());
-                    } //while loop code ends
-                }
-                    else
-                    {
-                       user.Dice[0].Roll();
-                       if (user.Dice[0].roll > (user.Dice[0].numberOfSides/2)) {
-                       Console.WriteLine($"{user.name} rolled a {user.Dice[0].numberOfSides} sided die for a result of {user.Dice[0].roll}. Above average");
-                       }
-                       else if (user.Dice[0].roll == (user.Dice[0].numberOfSides/2)) {
-                       Console.WriteLine($"{user.name} rolled a {user.Dice[0].numberOfSides} sided die for a result of {user.Dice[0].roll}. Average");
-                       }
-                       else {
-                       Console.WriteLine($"{user.name} rolled a {user.Dice[0].numberOfSides} sided die for a result of {user.Dice[0].roll}. Below Average");
-                       }
-                    user.Dice[0].userRolled = true;
-                        user.roundScore = user.Dice[0].roll;
-                        user.totalScore += user.roundScore;
-                        Console.WriteLine($"{user.totalScore} vs {cpu.totalScore}");
-                        user.turnsTaken += 1;
-                        Console.WriteLine($"Turns taken: {user.turnsTaken}"); //shows how many turns are taken
-                        isCurrentTurn = false; //breaks the loop
+                        Console.WriteLine("Please enter yes or no.");
                     }
-                }
-                else if (num == user.Dice[1].numberOfSides)
-                {
-                    if (user.Dice[1].userRolled == true)
-                    {
-                        Console.WriteLine("Already rolled"); //asks user to choose die again
-                    while (num != user.Dice[0].numberOfSides && num != user.Dice[2].numberOfSides && num != user.Dice[3].numberOfSides)
-                    {
-                        Console.WriteLine("Which die would you like to roll?");
-                        num = int.Parse(Console.ReadLine());
-                    } //while loop code ends
-                }
-                    else
-                    {
-                        user.Dice[1].Roll();
-                    if (user.Dice[1].roll > (user.Dice[1].numberOfSides / 2))
-                    {
-                        Console.WriteLine($"{user.name} rolled a {user.Dice[1].numberOfSides} sided die for a result of {user.Dice[1].roll}. Above average");
-                    }
-                    else if (user.Dice[1].roll == (user.Dice[1].numberOfSides / 2))
-                    {
-                        Console.WriteLine($"{user.name} rolled a {user.Dice[1].numberOfSides} sided die for a result of {user.Dice[1].roll}. Average");
-                    }
-                    else
-                    {
-                        Console.WriteLine($"{user.name} rolled a {user.Dice[1].numberOfSides} sided die for a result of {user.Dice[1].roll}. Below Average");
-                    }
-                    user.Dice[1].userRolled = true;
-                    user.roundScore = user.Dice[1].roll;
-                    user.totalScore += user.roundScore;
-                    Console.WriteLine($"{user.totalScore} vs {cpu.totalScore}");
-                    user.turnsTaken += 1;
-                        Console.WriteLine($"Turns taken: {user.turnsTaken}"); //shows how many turns are taken
-                        isCurrentTurn = false; //breaks the loop
-                    }
-                }
-                else if (num == user.Dice[2].numberOfSides)
-                {
-                    if (user.Dice[2].userRolled == true)
-                    {
-                        Console.WriteLine("Already rolled"); //asks user to choose die again
-                    while (num != user.Dice[0].numberOfSides && num != user.Dice[1].numberOfSides && num != user.Dice[3].numberOfSides)
-                    {
-                        Console.WriteLine("Which die would you like to roll?");
-                        num = int.Parse(Console.ReadLine());
-                    } //while loop code ends
-                }
-                    else
-                    {
-                        user.Dice[2].Roll();
-                    if (user.Dice[2].roll > (user.Dice[2].numberOfSides / 2))
-                    {
-                        Console.WriteLine($"{user.name} rolled a {user.Dice[2].numberOfSides} sided die for a result of {user.Dice[2].roll}. Above average");
-                    }
-                    else if (user.Dice[2].roll == (user.Dice[2].numberOfSides / 2))
-                    {
-                        Console.WriteLine($"{user.name} rolled a {user.Dice[2].numberOfSides} sided die for a result of {user.Dice[2].roll}. Average");
-                    }
-                    else
-                    {
-                        Console.WriteLine($"{user.name} rolled a {user.Dice[2].numberOfSides} sided die for a result of {user.Dice[2].roll}. Below Average");
-                    }
-                    user.Dice[2].userRolled = true;
-                    user.roundScore = user.Dice[2].roll;
-                    user.totalScore += user.roundScore;
-                    Console.WriteLine($"{user.totalScore} vs {cpu.totalScore}");
-                    user.turnsTaken += 1;
-                        Console.WriteLine($"Turns taken: {user.turnsTaken}"); //shows how many turns are taken
-                        isCurrentTurn = false; //breaks the loop
-                    }
-                }
-                else if (num == user.Dice[3].numberOfSides)
-                {
-                    if (user.Dice[3].userRolled == true)
-                    {
-                        Console.WriteLine("Already rolled"); //asks user to choose die again
-                    while (num != user.Dice[0].numberOfSides && num != user.Dice[1].numberOfSides && num != user.Dice[2].numberOfSides)
-                    {
-                        Console.WriteLine("Which die would you like to roll?");
-                        num = int.Parse(Console.ReadLine());
-                    } //while loop code ends
-                }
-                    else
-                    {
-                        user.Dice[3].Roll();
-                    if (user.Dice[3].roll > (user.Dice[3].numberOfSides / 2))
-                    {
-                        Console.WriteLine($"{user.name} rolled a {user.Dice[3].numberOfSides} sided die for a result of {user.Dice[3].roll}. Above average");
-                    }
-                    else if (user.Dice[3].roll == (user.Dice[3].numberOfSides / 2))
-                    {
-                        Console.WriteLine($"{user.name} rolled a {user.Dice[3].numberOfSides} sided die for a result of {user.Dice[3].roll}. Average");
-                    }
-                    else
-                    {
-                        Console.WriteLine($"{user.name} rolled a {user.Dice[3].numberOfSides} sided die for a result of {user.Dice[3].roll}. Below Average");
-                    }
-                    user.Dice[3].userRolled = true;
-                    user.roundScore = user.Dice[3].roll;
-                    user.totalScore += user.roundScore;
-                    Console.WriteLine($"{user.totalScore} vs {cpu.totalScore}");
-                    user.turnsTaken += 1;
-                        Console.WriteLine($"Turns taken: {user.turnsTaken}"); //shows how many turns are taken
-                        isCurrentTurn = false; //breaks the loop
-                    }
-                }
-                else
-                {
-                    Console.WriteLine("Dice unavailable"); //asks user to choose die again
-                }
-        }
-    }
-    public void cpuTurn(Player user, Player cpu)
-    {
-        Random random = new Random();
-        bool isCurrentTurn = true;
+                } while (response.ToUpper() != "YES" && response.ToUpper() != "NO");
 
-        while (cpu.turnsTaken < 5 && isCurrentTurn == true)
-        {
-            Console.WriteLine("  ____ ____  _   _ _       _____                 \r\n / ___|  _ \\| | | ( )___  |_   _|   _ _ __ _ __  \r\n| |   | |_) | | | |// __|   | || | | | '__| '_ \\ \r\n| |___|  __/| |_| | \\__ \\   | || |_| | |  | | | |\r\n \\____|_|    \\___/  |___/   |_| \\__,_|_|  |_| |_|");
-            int dieChoice = random.Next(0, cpu.Dice.Count+1);
-            if (dieChoice == 0) 
-            {
-                cpu.Dice[0].Roll();
-                if (cpu.Dice[0].roll > (cpu.Dice[0].numberOfSides / 2))
+                if (response.ToUpper() == "YES")
                 {
-                    Console.WriteLine($"{cpu.name} rolled a {cpu.Dice[0].numberOfSides} sided die for a result of {cpu.Dice[0].roll}. Above average");
-                }
-                else if (cpu.Dice[0].roll == (cpu.Dice[0].numberOfSides / 2))
-                {
-                    Console.WriteLine($"{cpu.name} rolled a {cpu.Dice[0].numberOfSides} sided die for a result of {cpu.Dice[0].roll}. Average");
-                }
-                else
-                {
-                    Console.WriteLine($"{cpu.name} rolled a {cpu.Dice[0].numberOfSides} sided die for a result of {cpu.Dice[0].roll}. Below Average");
-                }
-                cpu.Dice[0].cpuRolled = true;
-                cpu.roundScore = cpu.Dice[0].roll;
-                cpu.totalScore += cpu.roundScore;
-                Console.WriteLine($"{user.totalScore} vs {cpu.totalScore}");
-                cpu.turnsTaken += 1;
-                Console.WriteLine($"Turns taken: {cpu.turnsTaken}"); //shows how many turns are taken
-                isCurrentTurn = false; //breaks the loop
-            }
-            else if (dieChoice == 1) 
-            {
-                cpu.Dice[1].Roll();
-                if (cpu.Dice[1].roll > (cpu.Dice[1].numberOfSides / 2))
-                {
-                    Console.WriteLine($"{cpu.name} rolled a {cpu.Dice[1].numberOfSides} sided die for a result of {cpu.Dice[1].roll}. Above average");
-                }
-                else if (cpu.Dice[1].roll == (cpu.Dice[1].numberOfSides / 2))
-                {
-                    Console.WriteLine($"{cpu.name} rolled a {cpu.Dice[1].numberOfSides} sided die for a result of {cpu.Dice[1].roll}. Average");
-                }
-                else
-                {
-                    Console.WriteLine($"{cpu.name} rolled a {cpu.Dice[1].numberOfSides} sided die for a result of {cpu.Dice[1].roll}. Below Average");
-                }
-                cpu.Dice[1].cpuRolled = true;
-                cpu.roundScore = cpu.Dice[1].roll;
-                cpu.totalScore += cpu.roundScore;
-                Console.WriteLine($"{user.totalScore} vs {cpu.totalScore}");
-                cpu.turnsTaken += 1;
-                Console.WriteLine($"Turns taken: {cpu.turnsTaken}"); //shows how many turns are taken
-                isCurrentTurn = false; //breaks the loop
-            }
-            else if (dieChoice == 2) 
-            {
-                cpu.Dice[2].Roll();
-                if (cpu.Dice[2].roll > (cpu.Dice[2].numberOfSides / 2))
-                {
-                    Console.WriteLine($"{cpu.name} rolled a {cpu.Dice[2].numberOfSides} sided die for a result of {cpu.Dice[2].roll}. Above average");
-                }
-                else if (cpu.Dice[2].roll == (cpu.Dice[2].numberOfSides / 2))
-                {
-                    Console.WriteLine($"{cpu.name} rolled a {cpu.Dice[2].numberOfSides} sided die for a result of {cpu.Dice[2].roll}. Average");
+                    String itemChoice = " ";
+                    do
+                    {
+                        Console.WriteLine("Which item would you like to use?");
+                        foreach (Item item in user.ItemInventory)
+                        {
+                            Console.WriteLine(item.itemName);
+                        }
+                        itemChoice = Console.ReadLine();
+                        foreach (Item item in user.ItemInventory)
+                        {
+                            if (itemChoice.ToUpper() == item.itemName.ToUpper())
+                            {
+                                rightChoice = true;
+                            }
+                        }
+                        if (!rightChoice)
+                        {
+                            Console.WriteLine("Please enter the right item name.");
+                        }
+                    } while (!rightChoice);
+
+                    for (int itemNum = 0; itemNum < user.ItemInventory.Count; itemNum++) //foreach loop will cause an invalid operation exception here
+
+                    {
+                        if (itemChoice.ToUpper() == user.ItemInventory[itemNum].itemName.ToUpper())
+                        {
+                            Console.WriteLine(user.ItemInventory[itemNum].asciiArt);
+                            user.ItemInventory[itemNum].useItem(user, enemy);
+                            user.ItemInventory.RemoveAt(itemNum);
+                            if (user.ItemInventory.Count == 0)
+                            {
+                                user.noItems = true;
+                            }
+                        }
+                    }
                 }
                 else
                 {
-                    Console.WriteLine($"{cpu.name} rolled a {cpu.Dice[2].numberOfSides} sided die for a result of {cpu.Dice[2].roll}. Below Average");
+                    normalRoll(user, enemy);
                 }
-                cpu.Dice[2].cpuRolled = true;
-                cpu.roundScore = cpu.Dice[2].roll;
-                cpu.totalScore += cpu.roundScore;
-                Console.WriteLine($"{user.totalScore} vs {cpu.totalScore}");
-                cpu.turnsTaken += 1;
-                Console.WriteLine($"Turns taken: {cpu.turnsTaken}"); //shows how many turns are taken
-                isCurrentTurn = false; //breaks the loop
             }
-            else if (dieChoice == 3) 
+            else
             {
-                cpu.Dice[3].Roll();
-                if (cpu.Dice[3].roll > (cpu.Dice[3].numberOfSides / 2))
-                {
-                    Console.WriteLine($"{cpu.name} rolled a {cpu.Dice[3].numberOfSides} sided die for a result of {cpu.Dice[3].roll}. Above average");
-                }
-                else if (cpu.Dice[3].roll == (cpu.Dice[3].numberOfSides / 2))
-                {
-                    Console.WriteLine($"{cpu.name} rolled a {cpu.Dice[3].numberOfSides} sided die for a result of {cpu.Dice[3].roll}. Average");
-                }
-                else
-                {
-                    Console.WriteLine($"{cpu.name} rolled a {cpu.Dice[3].numberOfSides} sided die for a result of {cpu.Dice[3].roll}. Below Average");
-                }
-                cpu.Dice[3].cpuRolled = true;
-                cpu.roundScore = cpu.Dice[3].roll;
-                cpu.totalScore += cpu.roundScore;
-                Console.WriteLine($"{user.totalScore} vs {cpu.totalScore}");
-                cpu.turnsTaken += 1;
-                Console.WriteLine($"Turns taken: {cpu.turnsTaken}"); //shows how many turns are taken
-                isCurrentTurn = false; //breaks the loop
+                normalRoll(user, enemy);
             }
         }
-    }
-    public void showRoundWinner(Player user, Player cpu)
-    {
-        Console.WriteLine($"This round's score: {user.roundScore} vs {cpu.roundScore}");
-        if (user.roundScore > cpu.roundScore)
+
+        void normalRoll(User user, Enemy enemy)
         {
-            Console.WriteLine($"{user.name} is in the lead this round!");
-            user.roundsWon++;
+            foreach (DieRoller die in user.Dice)
+            {
+                if (die.numberOfSides == enemy.Dice[0].numberOfSides)
+                {
+                    Console.WriteLine("__   _____  _   _ ____    _____ _   _ ____  _   _ \r\n\\ \\ / / _ \\| | | |  _ \\  |_   _| | | |  _ \\| \\ | |\r\n \\ V / | | | | | | |_) |   | | | | | | |_) |  \\| |\r\n  | || |_| | |_| |  _ <    | | | |_| |  _ <| |\\  |\r\n  |_| \\___/ \\___/|_| \\_\\   |_|  \\___/|_| \\_\\_| \\_|");
+                    //YOUR TURN
+                    die.Roll();
+                    if (die.roll > die.numberOfSides / 2)
+                    {
+                        Console.WriteLine($"{user.name} rolled a {die.numberOfSides} sided die for a result of {die.roll}. Above average");
+                    }
+                    else if (die.roll == die.numberOfSides / 2)
+                    {
+                        Console.WriteLine($"{user.name} rolled a {die.numberOfSides} sided die for a result of {die.roll}. Average");
+                    }
+                    else
+                    {
+                        Console.WriteLine($"{user.name} rolled a {die.numberOfSides} sided die for a result of {die.roll}. Below average");
+                    }
+                    enemy.health -= die.roll;
+                    Console.WriteLine(" _____ _   _ _____ __  ____   ___ ____    _____ _   _ ____  _   _ \r\n| ____| \\ | | ____|  \\/  \\ \\ / ( ) ___|  |_   _| | | |  _ \\| \\ | |\r\n|  _| |  \\| |  _| | |\\/| |\\ V /|/\\___ \\    | | | | | | |_) |  \\| |\r\n| |___| |\\  | |___| |  | | | |    ___) |   | | | |_| |  _ <| |\\  |\r\n|_____|_| \\_|_____|_|  |_| |_|   |____/    |_|  \\___/|_| \\_\\_| \\_|");
+                    //ENEMY'S TURN
+                    enemy.Dice[0].Roll();
+                    if (enemy.Dice[0].roll > enemy.Dice[0].numberOfSides / 2)
+                    {
+                        Console.WriteLine($"{enemy.name} rolled a {enemy.Dice[0].numberOfSides} sided die for a result of {enemy.Dice[0].roll}. Above average");
+                    }
+                    else if (die.roll == die.numberOfSides / 2)
+                    {
+                        Console.WriteLine($"{enemy.name} rolled a {enemy.Dice[0].numberOfSides} sided die for a result of {enemy.Dice[0].roll}. Average");
+                    }
+                    else
+                    {
+                        Console.WriteLine($"{enemy.name} rolled a {enemy.Dice[0].numberOfSides} sided die for a result of {enemy.Dice[0].roll}. Below average");
+                    }
+                    user.health -= enemy.Dice[0].roll;
+                    Console.WriteLine($"{user.health} vs {enemy.health}");
+                    if (enemy.health <= 0)
+                    {
+                        enemy.enemyIsDead();
+                    }
+                }
+            }
         }
-        else if (user.roundScore == cpu.roundScore)
+
+        void endOfGame(User user, Enemy cpu1, Enemy cpu2, Enemy cpu3, Enemy cpu4)
         {
-            Console.WriteLine($"Both of you are tied this round!");
+            Console.WriteLine(" _____ _            _____           _ \r\n|_   _| |__   ___  | ____|_ __   __| |\r\n  | | | '_ \\ / _ \\ |  _| | '_ \\ / _` |\r\n  | | | | | |  __/ | |___| | | | (_| |\r\n  |_| |_| |_|\\___| |_____|_| |_|\\__,_|");
+            //THE END
+            if (user.health > 0 && cpu1.health <= 0 && cpu2.health <= 0 && cpu3.health <= 0 && cpu4.health <= 0)
+            {
+                Console.WriteLine($"Congratulations {user.name}! You have won with {user.health} health points remaining and have successfully defeated all apex predators! Time to cook up a nice feast with all your prey!");
+                Console.WriteLine("_          _\r\n                           (c)___c____(c)\r\n                            \\ ........../\r\n                             |.........|\r\n                              |.......|\r\n                              |.......|\r\n                              |=======|\r\n                              |=======|\r\n                             __o)\"\"\"\"::?\r\n                            C__    c)::;\r\n                               >--   ::     /\\\r\n                               (____/      /__\\\r\n                               } /\"\"|      |##|\r\n                    __/       (|V ^ )\\     |##|\r\n                    o | _____/ |#/ / |     |##|\r\n           @        o_|}|_____/|/ /  |     |##|\r\n                          _____/ /   |     !!\r\n              ======ooo}{|______)#   |     /`'\\\r\n          ~~ ;    ;          ###---|8     \"\"\r\n        __;_____;____        ###====     /:|\\\r\n       (///0///@///@///)       ###@@@@|\r\n       |~~~~~~~~~~~~~~~|       ###@@@@|\r\n        \\             /        ###@@@@|               +\r\n         \\___________/         ###xxxxx      /\\      //\r\n           H H   H  H          ###|| |      /  \\    //\r\n           H H   H  H           | || |     /____\\  /~^\r\n           H H   H  H           C |C |     |@@| /__|#|_\r\n           H H   H  H            || ||    /_|@@|_/___|#|/|\r\n v    \\/   H(o) (o) H            || ::   |:::::::::::::|#|\r\n ~    ~~  (o)      (o)        Ccc__)__)  |ROMAN CANDLES|#|\r\n  \\|/      ~   @* & ~                    |:::::::::::::|/  \\|/\r\n   ~           \\|/        !!        \\ !/  ~~~~~~~~~~~    ~\r\n               ~        ~         ~           ~~\r\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+            }
+            else if (user.health <= 0 && cpu1.health > 0 || cpu2.health > 0 || cpu3.health > 0 || cpu4.health > 0)
+            {
+                Console.WriteLine("_  /)\r\n                 mo / )\r\n                 |/)\\)\r\n                  /\\_\r\n                  \\__|=\r\n                 (    )\r\n                 _)(_\r\n           ____/      \\\\____\r\n          |                  ||\r\n          |  _     _   _   ||\r\n          | | \\     |   | \\  ||\r\n          | |  |    |   |  | ||\r\n          | |_/     |   |_/  ||\r\n          | | \\     |   |    ||\r\n          | |  \\    |   |    ||\r\n          | |   \\. |. | .  ||\r\n          |                  ||\r\n  *       | *   *    * *   |**      **\r\n   \\))ejm96/.,(//,,..,,\\||(,,.,\\\\,.((//");
+                //Show picture of tombstone
+                Console.WriteLine($"Congratulations apex predators! The 4 of you have officially hunted {user.name} and you can enjoy them for dinner! \n Who is still alive to eat the remains of {user.name}?");
+                foreach (Enemy enemy in enemies)
+                {
+                    if (enemy.health > 0)
+                    {
+                        Console.WriteLine($"{enemy.asciiArt}");
+                    }
+                    Console.WriteLine($"{enemy.name} has won with {enemy.health} remaining.");
+                }
+            }
+            else
+            {
+                Console.WriteLine($"Seems like both you and all 4 apex predators have succumbed to your respective injuries. \nR.I.P. {user.name} and all apex predators...");
+            }
+            Console.WriteLine(" _____ _                 _                           __            \r\n|_   _| |__   __ _ _ __ | | __  _   _  ___  _   _   / _| ___  _ __ \r\n  | | | '_ \\ / _` | '_ \\| |/ / | | | |/ _ \\| | | | | |_ / _ \\| '__|\r\n  | | | | | | (_| | | | |   <  | |_| | (_) | |_| | |  _| (_) | |   \r\n  |_| |_| |_|\\__,_|_| |_|_|\\_\\  \\__, |\\___/ \\__,_| |_|  \\___/|_|   \r\n       _             _          |___/                              \r\n _ __ | | __ _ _   _(_)_ __   __ _| |                              \r\n| '_ \\| |/ _` | | | | | '_ \\ / _` | |                              \r\n| |_) | | (_| | |_| | | | | | (_| |_|                              \r\n| .__/|_|\\__,_|\\__, |_|_| |_|\\__, (_)                              \r\n|_|            |___/         |___/                                 ");
+            //show picture of person cooking dinner
+
         }
-        else
-        {
-            Console.WriteLine($"{cpu.name} is in the lead this round!");
-            cpu.roundsWon++;
-        }
-        Console.WriteLine($"Rounds won: {user.roundsWon} vs {cpu.roundsWon}");
-    }
-    public void endOfGame(Player user, Player cpu)
-    {
-        Console.WriteLine(" _____ _            _____           _ \r\n|_   _| |__   ___  | ____|_ __   __| |\r\n  | | | '_ \\ / _ \\ |  _| | '_ \\ / _` |\r\n  | | | | | |  __/ | |___| | | | (_| |\r\n  |_| |_| |_|\\___| |_____|_| |_|\\__,_|");
-        if (user.totalScore > ((user.Dice[0].numberOfSides + user.Dice[1].numberOfSides + user.Dice[2].numberOfSides + user.Dice[3].numberOfSides) / 2))
-        {
-            Console.WriteLine($"Final score of {user.name}: {user.totalScore}- Above average");
-        }
-        else if (user.totalScore == ((user.Dice[0].numberOfSides + user.Dice[1].numberOfSides + user.Dice[2].numberOfSides + user.Dice[3].numberOfSides) / 2))
-        {
-            Console.WriteLine($"Final score of {user.name}: {user.totalScore}- Average");
-        }
-        else
-        {
-            Console.WriteLine($"Final score of {user.name}: {user.totalScore}- Below average");
-        }
-        if (cpu.totalScore > ((cpu.Dice[0].numberOfSides + cpu.Dice[1].numberOfSides + cpu.Dice[2].numberOfSides + cpu.Dice[3].numberOfSides) / 2))
-        {
-            Console.WriteLine($"Final score of {cpu.name}: {cpu.totalScore}- Above average");
-        }
-        else if (cpu.totalScore == ((cpu.Dice[0].numberOfSides + cpu.Dice[1].numberOfSides + cpu.Dice[2].numberOfSides + cpu.Dice[3].numberOfSides) / 2))
-        {
-            Console.WriteLine($"Final score of {cpu.name}: {cpu.totalScore}- Average");
-        }
-        else
-        {
-            Console.WriteLine($"Final score of {cpu.name}: {cpu.totalScore}- Below average");
-        }
-        Console.WriteLine($"Rounds won: {user.roundsWon} vs {cpu.roundsWon}");
-        if (user.totalScore > cpu.totalScore)
-        {
-            Console.WriteLine($"Congratulations {user.name}! You have won with {user.totalScore} points and won {user.roundsWon} rounds!");
-        }
-        else if (cpu.totalScore > user.totalScore)
-        {
-            Console.WriteLine($"Congratulations {cpu.name}! They have won with {cpu.totalScore} points and won {user.roundsWon} rounds!");
-        }
-        else
-        {
-            Console.WriteLine($"Congratulations to the both of you! You two are tied at {user.totalScore} points. {user.name} won {user.roundsWon} rounds and {cpu.name} won {cpu.roundsWon} rounds");
-        }
-        Console.WriteLine(" _____ _                 _                           __            \r\n|_   _| |__   __ _ _ __ | | __  _   _  ___  _   _   / _| ___  _ __ \r\n  | | | '_ \\ / _` | '_ \\| |/ / | | | |/ _ \\| | | | | |_ / _ \\| '__|\r\n  | | | | | | (_| | | | |   <  | |_| | (_) | |_| | |  _| (_) | |   \r\n  |_| |_| |_|\\__,_|_| |_|_|\\_\\  \\__, |\\___/ \\__,_| |_|  \\___/|_|   \r\n       _             _          |___/                              \r\n _ __ | | __ _ _   _(_)_ __   __ _| |                              \r\n| '_ \\| |/ _` | | | | | '_ \\ / _` | |                              \r\n| |_) | | (_| | |_| | | | | | (_| |_|                              \r\n| .__/|_|\\__,_|\\__, |_|_| |_|\\__, (_)                              \r\n|_|            |___/         |___/                                 ");
+
+
     }
 }
-
-
