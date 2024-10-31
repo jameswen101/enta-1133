@@ -2,10 +2,8 @@
 
 public class Player
 {
-    public int roundScore, totalScore = 0;
-    public int turnsTaken = 0;
-    public int roundsWon = 0;
     public List<DieRoller> Dice = new List<DieRoller>();
+    public int health = 0, row = 0, col = 0;
     public String name;
 
     public Player(String name) //constructor
